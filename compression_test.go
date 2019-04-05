@@ -12,6 +12,7 @@ import (
 	"github.com/segmentio/kafka-go/gzip"
 	"github.com/segmentio/kafka-go/lz4"
 	"github.com/segmentio/kafka-go/snappy"
+	"github.com/segmentio/kafka-go/zstd"
 )
 
 func TestCompression(t *testing.T) {
@@ -22,6 +23,7 @@ func TestCompression(t *testing.T) {
 	testEncodeDecode(t, msg, gzip.NewCompressionCodec())
 	testEncodeDecode(t, msg, snappy.NewCompressionCodec())
 	testEncodeDecode(t, msg, lz4.NewCompressionCodec())
+	testEncodeDecode(t, msg, zstd.NewCompressionCodec())
 }
 
 func testEncodeDecode(t *testing.T, m kafka.Message, codec kafka.CompressionCodec) {
@@ -63,6 +65,8 @@ func codecToStr(codec int8) string {
 		return "snappy"
 	case lz4.Code:
 		return "lz4"
+	case zstd.Code:
+		return "zstd"
 	default:
 		return "unknown"
 	}
@@ -72,6 +76,7 @@ func TestCompressedMessages(t *testing.T) {
 	testCompressedMessages(t, gzip.NewCompressionCodec())
 	testCompressedMessages(t, snappy.NewCompressionCodec())
 	testCompressedMessages(t, lz4.NewCompressionCodec())
+	testCompressedMessages(t, zstd.NewCompressionCodec())
 }
 
 func testCompressedMessages(t *testing.T, codec kafka.CompressionCodec) {
@@ -253,6 +258,11 @@ func BenchmarkCompression(b *testing.B) {
 		{
 			scenario: "LZ4",
 			codec:    lz4.NewCompressionCodec(),
+			function: benchmarkCompression,
+		},
+		{
+			scenario: "zstd",
+			codec:    zstd.NewCompressionCodec(),
 			function: benchmarkCompression,
 		},
 	}
